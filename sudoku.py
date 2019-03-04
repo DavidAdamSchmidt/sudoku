@@ -1,6 +1,7 @@
 import copy
 import random
 import sys
+import time
 
 
 def set_fg_colour(colour):
@@ -47,8 +48,8 @@ def get_input():
         set_fg_colour(blue)
         try:
             input_values = list(
-                input("\n" +
-                      "[row] [column] [number to write]: ").split())
+                input("\n"
+                      + "[row] [column] [number to write]: ").split())
             i = 0
             while i < 3:
                 input_values[i] = int(input_values[i])
@@ -57,8 +58,8 @@ def get_input():
                 i += 1
             if i < 3:
                 set_fg_colour(red)
-                print("\n" + "Numbers have to be between" +
-                      "0 and 9, please try again")
+                print("\n" + "Numbers have to be between"
+                      + "0 and 9, please try again")
             else:
                 return input_values
         except (ValueError, IndexError):
@@ -201,6 +202,8 @@ while grid == []:
 
 orig_grid = copy.deepcopy(grid)
 
+start = time.time()
+
 game_won = False
 while not game_won:
     print_grid(grid, orig_grid)
@@ -225,8 +228,8 @@ while not game_won:
             if iterator < 9:
                 set_fg_colour(red)
                 print(
-                    "\n" + "Column %d can't have another %d" %
-                    (column + 1, number))
+                    "\n" + "Column %d can't have another %d"
+                    % (column + 1, number))
             else:
                 row_start = calculate_start(row)
                 column_start = calculate_start(column)
@@ -236,5 +239,13 @@ while not game_won:
                 else:
                     grid[row][column] = number
                     game_won = check_if_won(grid)
+seconds = time.time() - start
+minutes = seconds // 60
+seconds -= minutes * 60
+hours = minutes // 60
+minutes -= hours * 60
 print_grid(grid, orig_grid)
 print_win_message()
+set_fg_colour(white)
+print("Clear time: %d hours, %d minutes, %d seconds"
+      % (hours, minutes, seconds) + "\n")
