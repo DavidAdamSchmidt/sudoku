@@ -173,6 +173,17 @@ def print_win_message():
     print("\n")
 
 
+def show_clear_time(start):
+    seconds = time.time() - start
+    minutes = seconds // 60
+    seconds -= minutes * 60
+    hours = minutes // 60
+    minutes -= hours * 60
+    set_fg_color(COLORS["white"])
+    print("Clear time: %d hours, %d minutes, %d seconds"
+          % (hours, minutes, seconds) + "\n")
+
+
 COLORS = {"red": 91, "green": 92, "yellow": 93, "blue": 94, "white": 97}
 
 grid = []
@@ -235,13 +246,6 @@ while not game_won:
                 else:
                     grid[row][column] = number
                     game_won = check_if_won(grid)
-seconds = time.time() - start
-minutes = seconds // 60
-seconds -= minutes * 60
-hours = minutes // 60
-minutes -= hours * 60
 print_grid(grid, orig_grid)
 print_win_message()
-set_fg_color(COLORS["white"])
-print("Clear time: %d hours, %d minutes, %d seconds"
-      % (hours, minutes, seconds) + "\n")
+show_clear_time(start)
