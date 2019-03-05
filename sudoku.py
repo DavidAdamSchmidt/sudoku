@@ -13,25 +13,27 @@ def set_fg_color(color):
 
 
 def get_grid():
-    while True:
+    grid = []
+    while grid == []:
         set_fg_color(COLORS["blue"])
         game_type = input("Choose game type (file or random): ")
         if game_type in ["file", "random"]:
-            while True:
+            while grid == []:
                 set_fg_color(COLORS["blue"])
                 diff = input(
                     "\n" + "Choose difficulty (easy, medium or hard): ")
                 if diff in ["easy", "medium", "hard", "finished"]:
                     if game_type == "file":
-                        return read_file(diff + ".txt")
+                        grid = read_file(diff + ".txt")
                     else:
-                        return create_sudoku(diff)
+                        grid = create_sudoku(diff)
                 else:
                     set_fg_color(COLORS["red"])
                     print("\n" + "Wrong difficulty, try again")
         else:
             set_fg_color(COLORS["red"])
             print("\n" + "Wrong game type, try again" + "\n")
+    return grid
 
 
 def read_file(filename):
