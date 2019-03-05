@@ -4,9 +4,34 @@ import sys
 import time
 
 
+COLORS = {"red": 91, "green": 92, "yellow": 93, "blue": 94, "white": 97}
+
+
 def set_fg_color(color):
     if sys.platform in ["linux", "linux2"]:
         print("\033[1;%s;49m" % color, end="")
+
+
+def get_grid():
+    while True:
+        set_fg_color(COLORS["blue"])
+        game_type = input("Choose game type (file or random): ")
+        if game_type in ["file", "random"]:
+            while True:
+                set_fg_color(COLORS["blue"])
+                diff = input(
+                    "\n" + "Choose difficulty (easy, medium or hard): ")
+                if diff in ["easy", "medium", "hard", "finished"]:
+                    if game_type == "file":
+                        return read_file(diff + ".txt")
+                    else:
+                        return create_sudoku(diff)
+                else:
+                    set_fg_color(COLORS["red"])
+                    print("\n" + "Wrong difficulty, try again")
+        else:
+            set_fg_color(COLORS["red"])
+            print("\n" + "Wrong game type, try again" + "\n")
 
 
 def read_file(filename):
@@ -151,6 +176,43 @@ def remove_numbers(grid, how_many):
         print("\n" + "Invalid function input")
 
 
+def edit_grid(grid, orig_grid):
+    game_won = False
+    while not game_won:
+        print_grid(grid, orig_grid)
+        input_values = get_input()
+        row = input_values[0] - 1
+        column = input_values[1] - 1
+        number = input_values[2]
+
+        if orig_grid[row][column] != 0:
+            set_fg_color(COLORS["red"])
+            print("\n" + "This number can't be changed")
+        elif number == 0:
+            grid[row][column] = 0
+        elif number in grid[row]:
+            set_fg_color(COLORS["red"])
+            print("\n" + "Row %d can't have another %d" % (row + 1, number))
+        else:
+            iterator = 0
+            while iterator < 9 and not number == grid[iterator][column]:
+                iterator += 1
+            if iterator < 9:
+                set_fg_color(COLORS["red"])
+                print(
+                    "\n" + "Column %d can't have another %d"
+                    % (column + 1, number))
+            else:
+                row_start = calculate_start(row)
+                column_start = calculate_start(column)
+                if box_contains_number(number, grid, row_start, column_start):
+                    set_fg_color(COLORS["red"])
+                    print("\n" + "Box can't have another %d" % number)
+                else:
+                    grid[row][column] = number
+                    game_won = check_if_won(grid)
+
+
 def check_if_won(grid):
     for i in range(9):
         for j in range(9):
@@ -184,68 +246,15 @@ def show_clear_time(start):
           % (hours, minutes, seconds) + "\n")
 
 
-COLORS = {"red": 91, "green": 92, "yellow": 93, "blue": 94, "white": 97}
-
-grid = []
-
-while grid == []:
-    set_fg_color(COLORS["blue"])
-    game_type = input("Choose game type (file or random): ")
-    if game_type in ["file", "random"]:
-        while grid == []:
-            set_fg_color(COLORS["blue"])
-            diff = input("\n" + "Choose difficulty (easy, medium or hard): ")
-            if diff in ["easy", "medium", "hard", "finished"]:
-                if game_type == "file":
-                    grid = read_file(diff + ".txt")
-                else:
-                    grid = create_sudoku(diff)
-            else:
-                set_fg_color(COLORS["red"])
-                print("\n" + "Wrong difficulty, try again")
-    else:
-        set_fg_color(COLORS["red"])
-        print("\n" + "Wrong game type, try again" + "\n")
-
-orig_grid = copy.deepcopy(grid)
-
-start = time.time()
-
-game_won = False
-while not game_won:
+def main():
+    grid = get_grid()
+    orig_grid = copy.deepcopy(grid)
+    start = time.time()
+    edit_grid(grid, orig_grid)
     print_grid(grid, orig_grid)
-    input_values = get_input()
-    row = input_values[0] - 1
-    column = input_values[1] - 1
-    number = input_values[2]
+    print_win_message()
+    show_clear_time(start)
 
-    if orig_grid[row][column] != 0:
-        set_fg_color(COLORS["red"])
-        print("\n" + "This number can't be changed")
-    else:
-        if number == 0:
-            grid[row][column] = 0
-        elif number in grid[row]:
-            set_fg_color(COLORS["red"])
-            print("\n" + "Row %d can't have another %d" % (row + 1, number))
-        else:
-            iterator = 0
-            while iterator < 9 and not number == grid[iterator][column]:
-                iterator += 1
-            if iterator < 9:
-                set_fg_color(COLORS["red"])
-                print(
-                    "\n" + "Column %d can't have another %d"
-                    % (column + 1, number))
-            else:
-                row_start = calculate_start(row)
-                column_start = calculate_start(column)
-                if box_contains_number(number, grid, row_start, column_start):
-                    set_fg_color(COLORS["red"])
-                    print("\n" + "Box can't have another %d" % number)
-                else:
-                    grid[row][column] = number
-                    game_won = check_if_won(grid)
-print_grid(grid, orig_grid)
-print_win_message()
-show_clear_time(start)
+
+if __name__ == "__main__":
+    main()
