@@ -18,8 +18,15 @@ def get_grid():
     grid = []
     while grid == []:
         set_fg_color("blue")
-        game_type = input("Choose game type (file or random): ")
-        if game_type in ["file", "random"]:
+        game_type = input("Choose game type (file, random or saved): ")
+        if game_type in ["file", "random", "saved"]:
+            if game_type == "saved":
+                grid = read_file("saved_grid.txt")
+                if grid != []:
+                    grid.append("saved")
+                else:
+                    print()
+                    continue
             while grid == []:
                 set_fg_color("blue")
                 diff = input(
@@ -76,9 +83,10 @@ def get_input():
     while True:
         set_fg_color("blue")
         try:
-            input_values = list(
-                input("\n"
-                      + "[row] [column] [number to write]: ").split())
+            input_value = input("\n" + "[row] [column] [number to write]: ")
+            if input_value == "quit":
+                return input_value
+            input_values = input_value.split()
             i = 0
             while i < 3:
                 input_values[i] = int(input_values[i])
@@ -181,10 +189,12 @@ def remove_numbers(grid, how_many):
 
 
 def edit_grid(grid, orig_grid):
-    game_won = False
-    while not game_won:
+    # game_won = False
+    while True:
         print_grid(grid, orig_grid)
         input_values = get_input()
+        if input_values == "quit":
+            return False
         row = input_values[0] - 1
         column = input_values[1] - 1
         number = input_values[2]
@@ -215,6 +225,8 @@ def edit_grid(grid, orig_grid):
                 else:
                     grid[row][column] = number
                     game_won = check_if_won(grid)
+                    if game_won:
+                        return True
 
 
 def check_if_won(grid):
@@ -223,6 +235,14 @@ def check_if_won(grid):
             if grid[i][j] == 0:
                 return False
     return True
+
+
+def save_game(filename, grid):
+    row = ""
+    with open(filename, "w") as f:
+        for i in grid:
+            row += " ".join([str(j) for j in i]) + "\n"
+        f.write(row)
 
 
 def print_win_message():
@@ -251,14 +271,24 @@ def show_clear_time(start):
 
 
 def main():
-    grid = get_grid()
-    orig_grid = copy.deepcopy(grid)
+    orig_grid = []
+    while orig_grid == []:
+        grid = get_grid()
+        if grid[-1] == "saved":
+            grid.remove("saved")
+            orig_grid = read_file("saved_orig_grid.txt")
+        else:
+            orig_grid = copy.deepcopy(grid)
     start = time.time()
-    edit_grid(grid, orig_grid)
-    print_grid(grid, orig_grid)
-    print_win_message()
-    show_clear_time(start)
-
+    if edit_grid(grid, orig_grid):
+        print_grid(grid, orig_grid)
+        print_win_message()
+        show_clear_time(start)
+    else:
+        answer = input("\n" + "Would you like to save your progress? ")
+        if "yes" in answer.lower():
+            save_game("saved_grid.txt", grid)
+            save_game("saved_orig_grid.txt", orig_grid)
 
 if __name__ == "__main__":
     main()
