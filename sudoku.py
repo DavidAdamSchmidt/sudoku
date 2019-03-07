@@ -1,5 +1,6 @@
 import copy
 import random
+import os
 import sys
 import time
 
@@ -191,6 +192,7 @@ def edit_grid(grid, orig_grid):
     while not game_won:
         print_grid(grid, orig_grid)
         input_values = get_input()
+        os.system("clear")
         if input_values == "quit":
             break
         row = input_values[0] - 1
